@@ -669,12 +669,6 @@ img {
 /* SKILLS */
 .skills {
   margin-top: 3rem;
-  text-align: center;
-}
-
-.skills .info__title {
-  display: inline-block;
-  text-align: left;
 }
 
 .skills__img {
@@ -688,18 +682,18 @@ img {
 }
 
 .skills__content {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 2rem 1.5rem;
-  max-width: 700px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem 2.5rem;
+  max-width: 900px;
   margin: 0 auto;
-  justify-items: center;
 }
 
 .skills__box {
   display: grid;
   place-items: center;
-  width: 80px;
+  width: 70px;
   transition: transform .4s;
 }
 
