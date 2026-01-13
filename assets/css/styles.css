@@ -120,8 +120,9 @@ img {
 
 /*=============== REUSABLE CSS CLASSES ===============*/
 .container {
-  max-width: 1120px;
-  margin-inline: 1.5rem;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
 }
 
 .grid {
@@ -130,8 +131,7 @@ img {
 }
 
 .section {
-  padding-block: 5rem 2rem;
-  min-height: 100vh;
+  padding-block: 4rem 2rem;
 }
 
 .section__title {
@@ -268,11 +268,20 @@ img {
       hsla(var(--hue), 40%, 12%, 1) 0%,
       hsla(var(--hue), 40%, 16%, 1) 50%,
       hsla(var(--hue), 40%, 18%, 1) 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .home__container {
-  row-gap: 2rem;
-  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding-top: 4rem;
+  text-align: center;
 }
 
 .home__img {
@@ -438,24 +447,26 @@ img {
       var(--container-color) 30%,
       var(--container-color) 70%,
       hsla(var(--hue), 40%, 14%, 1) 100%);
-  padding-block: 5rem 4rem;
+  padding-block: 3rem;
   overflow: hidden;
+  width: 100%;
 }
 
 /* Marquee Container */
 .marquee {
-  width: 100%;
+  width: 100vw;
   overflow: hidden;
-  padding: 2rem 0;
+  padding: 1.5rem 0;
   position: relative;
+  margin-left: calc(-50vw + 50%);
 }
 
 /* Marquee Track - CONTINUOUS ANIMATION */
 .marquee__track {
   display: flex;
-  gap: 1.5rem;
-  width: fit-content;
-  animation: scroll 25s linear infinite;
+  gap: 1rem;
+  width: max-content;
+  animation: scroll 20s linear infinite;
   will-change: transform;
 }
 
@@ -469,24 +480,24 @@ img {
   }
 
   100% {
-    transform: translateX(calc(-50% - 0.75rem));
+    transform: translateX(calc(-50% - 0.5rem));
   }
 }
 
 /* Individual Project Card */
 .marquee__card {
   flex-shrink: 0;
-  width: 300px;
-  height: 420px;
+  width: clamp(200px, 20vw, 280px);
+  min-height: 320px;
   display: flex;
   flex-direction: column;
   background: linear-gradient(145deg,
       hsla(var(--hue), 50%, 25%, 0.9) 0%,
       hsla(var(--hue), 45%, 15%, 0.95) 100%);
   backdrop-filter: blur(10px);
-  border-radius: 1.5rem;
+  border-radius: 1rem;
   border: 2px solid hsla(var(--hue), 60%, 50%, 0.3);
-  padding: 1.5rem;
+  padding: 1.25rem;
   transition: all 0.3s ease;
   cursor: pointer;
 }
@@ -597,7 +608,13 @@ img {
 }
 
 /*=============== INFO ===============*/
+.info {
+  padding-block: 4rem 3rem;
+}
+
 .info__container {
+  max-width: 1000px;
+  margin-inline: auto;
   row-gap: 3rem;
 }
 
@@ -606,6 +623,8 @@ img {
   font-size: var(--small-font-size);
   color: var(--text-color);
   margin-bottom: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .info__title::after {
@@ -613,18 +632,21 @@ img {
   position: absolute;
   left: 0;
   bottom: -0.5rem;
-  width: 20px;
+  width: 30px;
   height: 2px;
-  background-color: var(--text-color);
+  background: linear-gradient(90deg, var(--first-color), var(--first-color-light));
 }
 
 /* ABOUT */
 .about {
-  row-gap: 3rem;
+  display: grid;
+  gap: 2rem;
+  align-items: center;
 }
 
 .about__description {
   margin-bottom: 2rem;
+  line-height: 1.7;
 }
 
 .about__description b {
@@ -632,18 +654,23 @@ img {
 }
 
 .about__img {
-  width: 250px;
+  width: 200px;
   justify-self: center;
+  border-radius: 1rem;
   mask-image: linear-gradient(to bottom,
       hsla(var(--hue), 40%, 16%)60%,
       transparent 100%);
 }
 
 .about__button {
-  width: 100%;
+  width: fit-content;
 }
 
 /* EXPERIENCE */
+.experience {
+  margin-top: 2rem;
+}
+
 .experience__content {
   row-gap: 2rem;
 }
@@ -654,7 +681,8 @@ img {
 
 .experience__company {
   font-size: var(--h2-font-size);
-  font-weight: var(--font-bold)
+  font-weight: var(--font-bold);
+  color: var(--first-color-light);
 }
 
 .experience__profession {
@@ -666,15 +694,16 @@ img {
   display: block;
   font-size: var(--small-font-size);
   margin-bottom: .75rem;
+  color: var(--text-color-light);
 }
 
 /* SKILLS */
 .skills {
-  margin-top: 3rem;
+  margin-top: 2rem;
 }
 
 .skills__img {
-  width: 40px;
+  width: 36px;
   margin-bottom: .5rem;
 }
 
@@ -684,18 +713,15 @@ img {
 }
 
 .skills__content {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 2rem 2.5rem;
-  max-width: 900px;
-  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: 1.5rem;
+  max-width: 600px;
 }
 
 .skills__box {
   display: grid;
   place-items: center;
-  width: 70px;
   transition: transform .4s;
 }
 
