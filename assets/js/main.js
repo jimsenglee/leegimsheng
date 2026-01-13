@@ -154,7 +154,54 @@ if (typingText) {
     setTimeout(type, 500);
 }
 
-// Marquee is now pure CSS - no JavaScript needed for continuous scroll
+/*=============== INFINITE MARQUEE - FILL VIEWPORT ===============*/
+function initMarquee() {
+    const track = document.querySelector('.marquee__track');
+    if (!track) return;
+
+    const cards = Array.from(track.querySelectorAll('.marquee__card'));
+    if (cards.length === 0) return;
+
+    // Get dimensions
+    const cardWidth = cards[0].offsetWidth;
+    const gap = 16; // 1rem gap
+    const viewportWidth = window.innerWidth;
+
+    // Calculate how many times we need to duplicate to fill 3x viewport
+    const totalCardWidth = cardWidth + gap;
+    const cardsNeededToFill = Math.ceil((viewportWidth * 3) / totalCardWidth);
+    const clonesNeeded = Math.max(cardsNeededToFill - cards.length, cards.length * 2);
+
+    // Remove existing clones (if resizing)
+    track.querySelectorAll('.marquee__card--clone').forEach(clone => clone.remove());
+
+    // Clone cards to fill the space
+    for (let i = 0; i < clonesNeeded; i++) {
+        const clone = cards[i % cards.length].cloneNode(true);
+        clone.classList.add('marquee__card--clone');
+        track.appendChild(clone);
+    }
+
+    // Calculate animation distance (half the total width for seamless loop)
+    const allCards = track.querySelectorAll('.marquee__card');
+    const halfLength = Math.floor(allCards.length / 2);
+    const animationDistance = halfLength * totalCardWidth;
+
+    // Set CSS custom property for animation
+    track.style.setProperty('--scroll-distance', `-${animationDistance}px`);
+
+    // Calculate animation duration based on speed (pixels per second)
+    const speed = 50; // pixels per second
+    const duration = animationDistance / speed;
+    track.style.setProperty('--scroll-duration', `${duration}s`);
+}
+
+// Initialize on load and resize
+window.addEventListener('load', initMarquee);
+window.addEventListener('resize', () => {
+    clearTimeout(window.marqueeResizeTimer);
+    window.marqueeResizeTimer = setTimeout(initMarquee, 250);
+});
 
 /*=============== CONTACT FORM SUBMISSION ===============*/
 const contactForm = document.getElementById('contact-form');

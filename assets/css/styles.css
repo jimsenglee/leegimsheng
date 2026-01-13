@@ -447,26 +447,27 @@ img {
       var(--container-color) 30%,
       var(--container-color) 70%,
       hsla(var(--hue), 40%, 14%, 1) 100%);
-  padding-block: 3rem;
+  padding-block: 2rem;
   overflow: hidden;
   width: 100%;
 }
 
-/* Marquee Container */
+/* Marquee Container - Full viewport width */
 .marquee {
   width: 100vw;
   overflow: hidden;
-  padding: 1.5rem 0;
+  padding: 1rem 0;
   position: relative;
-  margin-left: calc(-50vw + 50%);
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-/* Marquee Track - CONTINUOUS ANIMATION */
+/* Marquee Track - JS-controlled animation */
 .marquee__track {
   display: flex;
   gap: 1rem;
   width: max-content;
-  animation: scroll 20s linear infinite;
+  animation: marqueeScroll var(--scroll-duration, 30s) linear infinite;
   will-change: transform;
 }
 
@@ -474,21 +475,21 @@ img {
   animation-play-state: paused;
 }
 
-@keyframes scroll {
+@keyframes marqueeScroll {
   0% {
     transform: translateX(0);
   }
 
   100% {
-    transform: translateX(calc(-50% - 0.5rem));
+    transform: translateX(var(--scroll-distance, -50%));
   }
 }
 
-/* Individual Project Card */
+/* Individual Project Card - Fixed width for consistency */
 .marquee__card {
   flex-shrink: 0;
-  width: clamp(200px, 20vw, 280px);
-  min-height: 320px;
+  width: 280px;
+  min-height: 340px;
   display: flex;
   flex-direction: column;
   background: linear-gradient(145deg,
@@ -1197,13 +1198,5 @@ img {
 
   .scrollup {
     right: 3rem;
-  }
-
-  .experience {
-    margin-left: 11.5rem;
-  }
-
-  .skills {
-    margin-left: 11.5rem;
   }
 }
