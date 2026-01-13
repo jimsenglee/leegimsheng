@@ -447,14 +447,16 @@ img {
   width: 100%;
   overflow: hidden;
   padding: 2rem 0;
+  position: relative;
 }
 
 /* Marquee Track - CONTINUOUS ANIMATION */
 .marquee__track {
   display: flex;
   gap: 1.5rem;
-  width: max-content;
-  animation: scroll 30s linear infinite;
+  width: fit-content;
+  animation: scroll 25s linear infinite;
+  will-change: transform;
 }
 
 .marquee:hover .marquee__track {
@@ -467,7 +469,7 @@ img {
   }
 
   100% {
-    transform: translateX(-50%);
+    transform: translateX(calc(-50% - 0.75rem));
   }
 }
 
