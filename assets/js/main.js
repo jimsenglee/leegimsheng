@@ -105,7 +105,7 @@ const sr = ScrollReveal({
 sr.reveal('.home__data, .experience, .skills, .contact__container')
 sr.reveal('.home__img', { delay: 600 })
 sr.reveal('.home__scroll', { delay: 800 })
-sr.reveal('.marquee__card, .services__card', { interval: 100 })
+sr.reveal('.services__card', { interval: 100 })
 sr.reveal('.about__content', { origin: 'right' })
 sr.reveal('.home__img', { origin: 'left' })
 
@@ -154,53 +154,242 @@ if (typingText) {
     setTimeout(type, 500);
 }
 
-/*=============== INFINITE MARQUEE - FILL VIEWPORT ===============*/
-function initMarquee() {
-    const track = document.querySelector('.marquee__track');
-    if (!track) return;
-
-    const cards = Array.from(track.querySelectorAll('.marquee__card'));
-    if (cards.length === 0) return;
-
-    // Get dimensions
-    const cardWidth = cards[0].offsetWidth;
-    const gap = 16; // 1rem gap
-    const viewportWidth = window.innerWidth;
-
-    // Calculate how many times we need to duplicate to fill 3x viewport
-    const totalCardWidth = cardWidth + gap;
-    const cardsNeededToFill = Math.ceil((viewportWidth * 3) / totalCardWidth);
-    const clonesNeeded = Math.max(cardsNeededToFill - cards.length, cards.length * 2);
-
-    // Remove existing clones (if resizing)
-    track.querySelectorAll('.marquee__card--clone').forEach(clone => clone.remove());
-
-    // Clone cards to fill the space
-    for (let i = 0; i < clonesNeeded; i++) {
-        const clone = cards[i % cards.length].cloneNode(true);
-        clone.classList.add('marquee__card--clone');
-        track.appendChild(clone);
-    }
-
-    // Calculate animation distance (half the total width for seamless loop)
-    const allCards = track.querySelectorAll('.marquee__card');
-    const halfLength = Math.floor(allCards.length / 2);
-    const animationDistance = halfLength * totalCardWidth;
-
-    // Set CSS custom property for animation
-    track.style.setProperty('--scroll-distance', `-${animationDistance}px`);
-
-    // Calculate animation duration based on speed (pixels per second)
-    const speed = 50; // pixels per second
-    const duration = animationDistance / speed;
-    track.style.setProperty('--scroll-duration', `${duration}s`);
+/*=============== PARTICLES.JS BACKGROUND ===============*/
+if (typeof particlesJS !== 'undefined') {
+    particlesJS('particles-js', {
+        particles: {
+            number: { value: 80, density: { enable: true, value_area: 800 } },
+            color: { value: ['#6366f1', '#818cf8', '#a5b4fc'] },
+            shape: { type: 'circle' },
+            opacity: { value: 0.5, random: true },
+            size: { value: 3, random: true },
+            line_linked: {
+                enable: true,
+                distance: 150,
+                color: '#6366f1',
+                opacity: 0.3,
+                width: 1
+            },
+            move: {
+                enable: true,
+                speed: 2,
+                direction: 'none',
+                random: false,
+                straight: false,
+                out_mode: 'out',
+                bounce: false
+            }
+        },
+        interactivity: {
+            detect_on: 'canvas',
+            events: {
+                onhover: { enable: true, mode: 'grab' },
+                onclick: { enable: true, mode: 'push' },
+                resize: true
+            },
+            modes: {
+                grab: { distance: 140, line_linked: { opacity: 0.8 } },
+                push: { particles_nb: 4 }
+            }
+        },
+        retina_detect: true
+    });
 }
 
-// Initialize on load and resize
-window.addEventListener('load', initMarquee);
+/*=============== DRAGGABLE MARQUEE WITH VELOCITY ===============*/
+function initDraggableMarquee() {
+    const track = document.querySelector('.marquee__track');
+    const marquee = document.querySelector('.marquee');
+    if (!track || !marquee) return;
+
+    // Get only ORIGINAL cards
+    const originalCards = Array.from(track.querySelectorAll('.marquee__card:not(.marquee__card--clone)'));
+    if (originalCards.length === 0) return;
+
+    // Remove existing clones
+    track.querySelectorAll('.marquee__card--clone').forEach(clone => clone.remove());
+
+    // Calculate dimensions
+    const cardWidth = originalCards[0].offsetWidth;
+    const gap = 16;
+    const viewportWidth = window.innerWidth;
+    const oneSetWidth = originalCards.length * (cardWidth + gap);
+    const setsNeeded = Math.ceil((viewportWidth * 4) / oneSetWidth) + 1;
+
+    // Clone cards
+    for (let set = 0; set < setsNeeded; set++) {
+        originalCards.forEach(card => {
+            const clone = card.cloneNode(true);
+            clone.classList.add('marquee__card--clone');
+            track.appendChild(clone);
+        });
+    }
+
+    // Remove CSS animation - we'll use JS
+    track.style.animation = 'none';
+
+    // State
+    let scrollPos = 0;
+    let velocity = 0;
+    let isDragging = false;
+    let hasDragged = false; // Track if actual dragging occurred
+    let startX = 0;
+    let lastX = 0;
+    let lastTime = 0;
+    let isHoveringCard = false;
+    let autoScrollSpeed = 0.8;
+    const dragThreshold = 5; // Pixels moved to count as drag
+
+    // Update position
+    function updatePosition() {
+        // Loop seamlessly
+        if (scrollPos <= -oneSetWidth) {
+            scrollPos += oneSetWidth;
+        } else if (scrollPos > 0) {
+            scrollPos -= oneSetWidth;
+        }
+        track.style.transform = `translateX(${scrollPos}px)`;
+    }
+
+    // Animation loop
+    function animate() {
+        if (!isDragging && !isHoveringCard) {
+            // Auto-scroll when not interacting
+            if (Math.abs(velocity) < 0.5) {
+                velocity = -autoScrollSpeed;
+            }
+        }
+
+        // Apply velocity with friction (momentum)
+        if (!isDragging) {
+            scrollPos += velocity;
+            velocity *= 0.95; // Less friction = more momentum
+        }
+
+        updatePosition();
+        requestAnimationFrame(animate);
+    }
+
+    // Prevent clicks on links after dragging
+    track.querySelectorAll('.marquee__card a, .marquee__card').forEach(el => {
+        el.addEventListener('click', (e) => {
+            if (hasDragged) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, true);
+    });
+
+    // Mouse events
+    track.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        hasDragged = false;
+        startX = e.pageX;
+        lastX = e.pageX;
+        lastTime = Date.now();
+        velocity = 0;
+        track.style.cursor = 'grabbing';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+
+        const dx = e.pageX - lastX;
+        const totalMove = Math.abs(e.pageX - startX);
+
+        // Mark as dragged if moved beyond threshold
+        if (totalMove > dragThreshold) {
+            hasDragged = true;
+        }
+
+        const dt = Date.now() - lastTime;
+
+        scrollPos += dx;
+        velocity = dx / Math.max(dt, 1) * 20; // Higher multiplier for more momentum
+
+        lastX = e.pageX;
+        lastTime = Date.now();
+
+        updatePosition();
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            track.style.cursor = 'grab';
+
+            // Reset hasDragged after a short delay to allow click prevention
+            setTimeout(() => {
+                hasDragged = false;
+            }, 100);
+        }
+    });
+
+    // Touch events
+    track.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        hasDragged = false;
+        startX = e.touches[0].pageX;
+        lastX = e.touches[0].pageX;
+        lastTime = Date.now();
+        velocity = 0;
+    }, { passive: true });
+
+    track.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+
+        const dx = e.touches[0].pageX - lastX;
+        const totalMove = Math.abs(e.touches[0].pageX - startX);
+
+        if (totalMove > dragThreshold) {
+            hasDragged = true;
+        }
+
+        const dt = Date.now() - lastTime;
+
+        scrollPos += dx;
+        velocity = dx / Math.max(dt, 1) * 20;
+
+        lastX = e.touches[0].pageX;
+        lastTime = Date.now();
+
+        updatePosition();
+    }, { passive: true });
+
+    track.addEventListener('touchend', () => {
+        isDragging = false;
+        setTimeout(() => {
+            hasDragged = false;
+        }, 100);
+    });
+
+    // Card-only hover pause
+    track.querySelectorAll('.marquee__card').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            if (!isDragging) {
+                isHoveringCard = true;
+                velocity = 0;
+            }
+        });
+        card.addEventListener('mouseleave', () => {
+            isHoveringCard = false;
+        });
+    });
+
+    // Set initial cursor
+    track.style.cursor = 'grab';
+
+    // Start animation
+    animate();
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', initDraggableMarquee);
+window.addEventListener('load', initDraggableMarquee);
 window.addEventListener('resize', () => {
     clearTimeout(window.marqueeResizeTimer);
-    window.marqueeResizeTimer = setTimeout(initMarquee, 250);
+    window.marqueeResizeTimer = setTimeout(initDraggableMarquee, 250);
 });
 
 /*=============== CONTACT FORM SUBMISSION ===============*/
